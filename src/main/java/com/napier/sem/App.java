@@ -1,33 +1,79 @@
 package com.napier.sem;
 
-import com.mongodb.MongoClient;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.MongoCollection;
-import org.bson.Document;
+import java.sql.*;
 
-public class App
-{
-    public static void main(String[] args)
-    {
-        // Connect to MongoDB on local system - we're using port 27000
-        MongoClient mongoClient = new MongoClient("mongo-dbserver");
-        // Get a database - will create when we use it
-        MongoDatabase database = mongoClient.getDatabase("mydb");
+public class App {
+    private Connection con = null;
 
-        // Get a collection from the database
-        MongoCollection<Document> collection = database.getCollection("test");
+    public void connect() {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            System.out.println("Could not load SQL driver");
+            System.exit(-1);
+        }
+        int retries = 10;
+        for (int i = 0; i < retries; ++i) {
+            System.out.println("Connecting to database...");
+            try {
+                Thread.sleep(30000);
+                con = DriverManager.getConnection("jdbc:mysql://db:3306/employees?allowPublicKeyRetrieval=true&useSSL=false", "root", "example");
+                System.out.println("Successfully connected");
+                break;
+            } catch (SQLException sqle) {
+                System.out.println("Failed to connect to database attempt " + Integer.toString(i));
+                System.out.println(sqle.getMessage());
+            } catch (InterruptedException ie) {
+                System.out.println("Thread interrupted? Should not happen.");
+            }
+        }
+    }
 
-        // Create a document to store
-        Document doc = new Document("name", "Kevin Sim")
-                .append("class", "DevOps")
-                .append("year", "2024")
-                .append("result", new Document("CW", 95).append("EX", 85));
+    public void disconnect() {
+        if (con != null) {
+            try {
+                con.close();
+            } catch (Exception e) {
+                System.out.println("Error closing connection to database");
+            }
+        }
+    }
 
-        // Add document to collection
-        collection.insertOne(doc);
+    public void getSalariesByRole(String role) {
+        try {
+            Statement stmt = con.createStatement();
+            String strSelect =
+                    "SELECT employees.emp_no, employees.first_name, employees.last_name, salaries.salary "
+                            + "FROM employees, salaries, titles "
+                            + "WHERE employees.emp_no = salaries.emp_no "
+                            + "AND employees.emp_no = titles.emp_no "
+                            + "AND salaries.to_date = '9999-01-01' "
+                            + "AND titles.to_date = '9999-01-01' "
+                            + "AND titles.title = '" + role + "' "
+                            + "ORDER BY employees.emp_no ASC";
 
-        // Check document in collection
-        Document myDoc = collection.find().first();
-        System.out.println(myDoc.toJson());
+            ResultSet rset = stmt.executeQuery(strSelect);
+
+            while (rset.next()) {
+                int emp_no = rset.getInt("emp_no");
+                String first_name = rset.getString("first_name");
+                String last_name = rset.getString("last_name");
+                int salary = rset.getInt("salary");
+                System.out.println(emp_no + " \t " + first_name + " \t " + last_name + " \t " + salary);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println("Failed to get salary details");
+        }
+    }
+
+    public static void main(String[] args) {
+        App a = new App();
+        a.connect();
+
+        System.out.println("Extracting salaries for Engineers...");
+        a.getSalariesByRole("Engineer");
+
+        a.disconnect();
     }
 }
