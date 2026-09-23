@@ -5,4 +5,6 @@ public class Employee {
     public String first_name;
     public String last_name;
     public int salary;
+    public Department dept;
+    public Employee manager;
 }
