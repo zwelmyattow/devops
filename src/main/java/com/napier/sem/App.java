@@ -75,20 +75,77 @@ public class App {
      */
     public ArrayList<Employee> getAllSalaries() {
         try {
-            // Create an SQL statement
             Statement stmt = con.createStatement();
-
-            // Construct the SQL query string to join employees and salaries tables
             String strSelect =
                     "SELECT employees.emp_no, employees.first_name, employees.last_name, salaries.salary "
                             + "FROM employees, salaries "
                             + "WHERE employees.emp_no = salaries.emp_no AND salaries.to_date = '9999-01-01' "
                             + "ORDER BY employees.emp_no ASC";
 
-            // Execute SQL statement
+            ResultSet rset = stmt.executeQuery(strSelect);
+            ArrayList<Employee> employees = new ArrayList<Employee>();
+            while (rset.next()) {
+                Employee emp = new Employee();
+                emp.emp_no = rset.getInt("employees.emp_no");
+                emp.first_name = rset.getString("employees.first_name");
+                emp.last_name = rset.getString("employees.last_name");
+                emp.salary = rset.getInt("salaries.salary");
+                employees.add(emp);
+            }
+            return employees;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println("Failed to get salary details");
+            return null;
+        }
+    }
+
+    /**
+     * Gets a Department object based on its name.
+     * @param dept_name The name of the department (e.g., "Sales").
+     * @return A Department object, or null if not found.
+     */
+    public Department getDepartment(String dept_name) {
+        try {
+            Statement stmt = con.createStatement();
+            String strSelect =
+                    "SELECT dept_no, dept_name FROM departments WHERE dept_name = '" + dept_name + "'";
             ResultSet rset = stmt.executeQuery(strSelect);
 
-            // Extract employee information into a list
+            if (rset.next()) {
+                Department dept = new Department();
+                dept.dept_no = rset.getString("dept_no");
+                dept.dept_name = rset.getString("dept_name");
+                return dept;
+            }
+            return null;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println("Failed to get department details");
+            return null;
+        }
+    }
+
+    /**
+     * Gets all salaries for a specific department.
+     * @param dept The Department object to extract salaries for.
+     * @return A list of employees and their salaries.
+     */
+    public ArrayList<Employee> getSalariesByDepartment(Department dept) {
+        try {
+            Statement stmt = con.createStatement();
+            // Using the SQL provided in the lab instructions
+            String strSelect =
+                    "SELECT employees.emp_no, employees.first_name, employees.last_name, salaries.salary "
+                            + "FROM employees, salaries, dept_emp, departments "
+                            + "WHERE employees.emp_no = salaries.emp_no "
+                            + "AND employees.emp_no = dept_emp.emp_no "
+                            + "AND dept_emp.dept_no = departments.dept_no "
+                            + "AND salaries.to_date = '9999-01-01' "
+                            + "AND departments.dept_no = '" + dept.dept_no + "' "
+                            + "ORDER BY employees.emp_no ASC";
+
+            ResultSet rset = stmt.executeQuery(strSelect);
             ArrayList<Employee> employees = new ArrayList<Employee>();
             while (rset.next()) {
                 Employee emp = new Employee();
@@ -112,16 +169,11 @@ public class App {
      * @param employees The list of employees to print.
      */
     public void printSalaries(ArrayList<Employee> employees) {
-        // Check employees is not null
         if (employees == null) {
             System.out.println("No employees found.");
             return;
         }
-
-        // Print header
         System.out.println(String.format("%-10s %-15s %-20s %-8s", "Emp No", "First Name", "Last Name", "Salary"));
-
-        // Loop over all employees in the list
         for (Employee emp : employees) {
             if (emp == null) continue;
             String emp_string =
@@ -132,17 +184,22 @@ public class App {
     }
 
     public static void main(String[] args) {
-        // Create new Application and connect to database
         App a = new App();
         a.connect();
 
-        // Extract employee salary information
-        ArrayList<Employee> employees = a.getAllSalaries();
+        // Extract department information
+        Department dept = a.getDepartment("Sales");
 
-        // Print the salaries
-        a.printSalaries(employees);
+        if (dept != null) {
+            // Extract employee salary information for the department
+            ArrayList<Employee> employees = a.getSalariesByDepartment(dept);
+            // Print the salaries
+            System.out.println("Salaries for Department: " + dept.dept_name);
+            a.printSalaries(employees);
+        } else {
+            System.out.println("Department not found.");
+        }
 
-        // Disconnect from database
         a.disconnect();
     }
 }
