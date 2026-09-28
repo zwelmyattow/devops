@@ -6,4 +6,6 @@ public class Employee {
     public int salary;
     public String title;
 
+    public Department dept;
+    public Employee manager;
 }
