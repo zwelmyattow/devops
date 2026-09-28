@@ -130,6 +130,18 @@ public class App {
             System.out.println(emp_string);
         }
     }
+    public void displayEmployee(Employee emp)
+    {
+        if (emp != null)
+        {
+            System.out.println(
+                    emp.emp_no + " "
+                            + emp.first_name + " "
+                            + emp.last_name + "\n"
+                            + "Emp Salary:" + emp.salary + "\n"
+                            + "Emp Title:" + emp.title + "\n");
+        }
+    }
 
     public static void main(String[] args) {
         // Create new Application and connect to database
