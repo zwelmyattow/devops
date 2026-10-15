@@ -202,7 +202,31 @@ public class App {
             return null;
         }
     }
+    public void printSalaries(ArrayList<Employee> employees) {
+        if (employees == null) {
+            System.out.println("No employees found.");
+            return;
+        }
+        System.out.println(String.format("%-10s %-15s %-20s %-8s", "Emp No", "First Name", "Last Name", "Salary"));
+        for (Employee emp : employees) {
+            if (emp == null) continue;
+            String emp_string =
+                    String.format("%-10s %-15s %-20s %-8s",
+                            emp.emp_no, emp.first_name, emp.last_name, emp.salary);
+            System.out.println(emp_string);
+        }
+    }
 
+    public void displayEmployee(Employee emp) {
+        if (emp != null) {
+            System.out.println(
+                    emp.emp_no + " "
+                            + emp.first_name + " "
+                            + emp.last_name + "\n"
+                            + "Emp Salary:" + emp.salary + "\n"
+                            + "Emp Title:" + emp.title + "\n");
+        }
+    }
     public static void main(String[] args) {
         // Connect to database
         if(args.length < 1){
