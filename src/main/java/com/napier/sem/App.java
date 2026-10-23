@@ -3,7 +3,6 @@ package com.napier.sem;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,6 +12,7 @@ import java.io.File;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.List;
 
 @SpringBootApplication
 @RestController
@@ -59,7 +59,7 @@ public class App {
     }
 
     // Markdown Report Generator Method
-    public void outputEmployees(ArrayList<Employee> employees, String filename) {
+    public void outputEmployees(List<Employee> employees, String filename) {
         if (employees == null) {
             System.out.println("No employees");
             return;
@@ -76,17 +76,17 @@ public class App {
         }
         try {
             new File("./reports/").mkdir();
-            BufferedWriter writer = new BufferedWriter(new FileWriter(new File("./reports/" + filename)));
+            BufferedWriter writer = new BufferedWriter(new FileWriter(new File("./reports/" + filename), java.nio.charset.StandardCharsets.UTF_8));
             writer.write(sb.toString());
             writer.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
     }
 
     // REST Endpoint: Get Salaries by Role
     @RequestMapping("salaries_role")
-    public ArrayList<Employee> getSalariesByRole(@RequestParam(value="role", defaultValue="Manager") String role) {
+    public List<Employee> getSalariesByRole(@RequestParam(value="role", defaultValue="Manager") String role) {
         try {
             Statement stmt = con.createStatement();
             String strSelect =
@@ -100,7 +100,7 @@ public class App {
                             + "ORDER BY employees.emp_no ASC";
 
             ResultSet rset = stmt.executeQuery(strSelect);
-            ArrayList<Employee> employees = new ArrayList<>();
+            List<Employee> employees = new ArrayList<>();
             while (rset.next()) {
                 Employee emp = new Employee();
                 emp.emp_no = rset.getInt("emp_no");
@@ -120,7 +120,7 @@ public class App {
 
     // REST Endpoint: Get All Salaries
     @RequestMapping("salaries")
-    public ArrayList<Employee> getAllSalaries() {
+    public List<Employee> getAllSalaries() {
         try {
             Statement stmt = con.createStatement();
             String strSelect =
@@ -130,7 +130,7 @@ public class App {
                             + "ORDER BY employees.emp_no ASC";
 
             ResultSet rset = stmt.executeQuery(strSelect);
-            ArrayList<Employee> employees = new ArrayList<>();
+            List<Employee> employees = new ArrayList<>();
             while (rset.next()) {
                 Employee emp = new Employee();
                 emp.emp_no = rset.getInt("employees.emp_no");
@@ -172,7 +172,7 @@ public class App {
 
     // REST Endpoint: Get Salaries by Department ID
     @RequestMapping("salaries_department")
-    public ArrayList<Employee> getSalariesByDepartment(@RequestParam(value="dept_no") String dept_no) {
+    public List<Employee> getSalariesByDepartment(@RequestParam(value="dept_no") String dept_no) {
         try {
             Statement stmt = con.createStatement();
             String strSelect =
@@ -186,7 +186,7 @@ public class App {
                             + "ORDER BY employees.emp_no ASC";
 
             ResultSet rset = stmt.executeQuery(strSelect);
-            ArrayList<Employee> employees = new ArrayList<>();
+            List<Employee> employees = new ArrayList<>();
             while (rset.next()) {
                 Employee emp = new Employee();
                 emp.emp_no = rset.getInt("employees.emp_no");
@@ -202,7 +202,7 @@ public class App {
             return null;
         }
     }
-    public void printSalaries(ArrayList<Employee> employees) {
+    public void printSalaries(List<Employee> employees) {
         if (employees == null) {
             System.out.println("No employees found.");
             return;
@@ -237,7 +237,7 @@ public class App {
 
         // Generate the markdown report
         App app = new App();
-        ArrayList<Employee> employees = app.getSalariesByRole("Manager");
+        List<Employee> employees = app.getSalariesByRole("Manager");
         app.outputEmployees(employees, "ManagerSalaries.md");
 
         // Run the Spring Boot Web Application
