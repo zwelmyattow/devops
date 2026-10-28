@@ -18,10 +18,11 @@ import java.util.List;
 @RestController
 public class App {
 
-    // Connection must be static for Spring Boot
+    // Connection must remain static for Spring Boot to share it across RestController instances
     private static Connection con = null;
 
-    public static void connect(String location, int delay) {
+    // Connect to the MySQL database (changed from static to instance method)
+    public void connect(String location, int delay) {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
         } catch (ClassNotFoundException e) {
@@ -48,13 +49,52 @@ public class App {
         }
     }
 
-    public static void disconnect() {
+    // Disconnect from the database
+    public void disconnect() {
         if (con != null) {
             try {
                 con.close();
             } catch (Exception e) {
                 System.out.println("Error closing connection to database");
             }
+        }
+    }
+
+    // Retrieve a single employee by their ID (Lab 07 Integration Test)
+    public Employee getEmployee(int ID) {
+        try {
+            Statement stmt = con.createStatement();
+            String strSelect =
+                    "SELECT emp_no, first_name, last_name FROM employees WHERE emp_no = " + ID;
+            ResultSet rset = stmt.executeQuery(strSelect);
+
+            if (rset.next()) {
+                Employee emp = new Employee();
+                emp.emp_no = rset.getInt("emp_no");
+                emp.first_name = rset.getString("first_name");
+                emp.last_name = rset.getString("last_name");
+                return emp;
+            }
+            return null;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println("Failed to get employee details");
+            return null;
+        }
+    }
+
+    // Add a new employee to the database (Lab 07 TDD Exercise)
+    public void addEmployee(Employee emp) {
+        try {
+            Statement stmt = con.createStatement();
+            String strUpdate =
+                    "INSERT INTO employees (emp_no, first_name, last_name, birth_date, gender, hire_date) " +
+                            "VALUES (" + emp.emp_no + ", '" + emp.first_name + "', '" + emp.last_name + "', " +
+                            "'9999-01-01', 'M', '9999-01-01')";
+            stmt.execute(strUpdate);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            System.out.println("Failed to add employee");
         }
     }
 
@@ -65,7 +105,7 @@ public class App {
             return;
         }
         StringBuilder sb = new StringBuilder();
-        sb.append("| Emp No | First Name | Last Name | Title | Salary | Department |                    Manager |\r\n");
+        sb.append("| Emp No | First Name | Last Name | Title | Salary | Department | Manager |\r\n");
         sb.append("| --- | --- | --- | --- | --- | --- | --- |\r\n");
         for (Employee emp : employees) {
             if (emp == null) continue;
@@ -107,7 +147,7 @@ public class App {
                 emp.first_name = rset.getString("first_name");
                 emp.last_name = rset.getString("last_name");
                 emp.salary = rset.getInt("salary");
-                emp.title = role; // Set the role based on the query parameter
+                emp.title = role;
                 employees.add(emp);
             }
             return employees;
@@ -202,6 +242,7 @@ public class App {
             return null;
         }
     }
+
     public void printSalaries(List<Employee> employees) {
         if (employees == null) {
             System.out.println("No employees found.");
@@ -227,16 +268,19 @@ public class App {
                             + "Emp Title:" + emp.title + "\n");
         }
     }
+
     public static void main(String[] args) {
+        // Create an instance of App so we can call the non-static methods
+        App app = new App();
+
         // Connect to database
         if(args.length < 1){
-            connect("localhost:33060", 30000);
+            app.connect("localhost:33060", 30000);
         } else {
-            connect(args[0], Integer.parseInt(args[1]));
+            app.connect(args[0], Integer.parseInt(args[1]));
         }
 
         // Generate the markdown report
-        App app = new App();
         List<Employee> employees = app.getSalariesByRole("Manager");
         app.outputEmployees(employees, "ManagerSalaries.md");
 
