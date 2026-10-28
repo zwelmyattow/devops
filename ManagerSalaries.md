@@ -1,4 +1,4 @@
-| Emp No | First Name | Last Name | Title | Salary | Department |                    Manager |
+| Emp No | First Name | Last Name | Title | Salary | Department | Manager |
 | --- | --- | --- | --- | --- | --- | --- |
 | 110039 | Vishwani | Minakawa | Manager | 106491 | null | null |
 | 110114 | Isamu | Legleitner | Manager | 83457 | null | null |
