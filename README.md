@@ -15,7 +15,7 @@ Throughout Labs 1-10, this repository tracks practical configurations for:
 This serves as a living log of my progression through the DevOps curriculum, moving from basic environment setup in Lab 1 to complex deployment automation in Lab 10.
 
 ![workflow](https://github.com/zwelmyattow/devops/actions/workflows/main.yml/badge.svg)
-[![LICENSE](https://img.shields.io/github/license/zwelmyattow/devops.svg?style=flat-square)](https://github.com/zwelmyattow/devops/blob/master/LICENSE)
-[![Releases](https://img.shields.io/github/release/zwelmyattow/devops/all.svg?style=flat-square)](https://github.com/zwelmyattow/devops/releases)
-![Develop Build Status](https://img.shields.io/github/actions/workflow/status/zwelmyattow/devops/main.yml?branch=develop&style=flat-square)
+![GitHub License](https://img.shields.io/github/license/zwelmyattow/devops)
+![GitHub Release](https://img.shields.io/github/v/release/zwelmyattow/devops)
+![Develop Build Status](https://github.com/zwelmyattow/devops/actions/workflows/YOUR_WORKFLOW_FILE.yml/badge.svg)
 [![codecov](https://codecov.io/gh/zwelmyattow/devops/graph/badge.svg)](https://codecov.io/gh/zwelmyattow/devops)
