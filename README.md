@@ -1,6 +1,3 @@
-# seMethods Project
-# DevOps
-
 # ☁️ DevOps Labs: 1 to 10
 
 **DevOps Practical Coursework | Edinburgh Napier University**
